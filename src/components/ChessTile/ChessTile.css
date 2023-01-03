@@ -1,4 +1,4 @@
-.Chessblock__tile_b {
+.ChessTile__tile_b {
     background-color: #779556;
     width: 100px;
     height: 100px;
@@ -7,7 +7,7 @@
     justify-content: center;
 }
 
-.Chessblock__tile_w {
+.ChessTile__tile_w {
     background-color: #ebecd0;
     width: 100px;
     height: 100px;

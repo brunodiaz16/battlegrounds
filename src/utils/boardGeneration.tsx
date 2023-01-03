@@ -1,4 +1,4 @@
-import Chessblock from '../components/Chessblock/Chessblock';
+import Chessblock from '../components/ChessTile/ChessTile';
 
 export const generateBoardGrid = (verticalAxis:Array<string>, horizontalAxis:Array<string>) => {
     let board = []

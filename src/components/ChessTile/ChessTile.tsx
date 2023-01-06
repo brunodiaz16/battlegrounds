@@ -11,6 +11,6 @@ interface IChessTileProps {
 
 export default function ChessTile({imagePiece, number, isWhite}:IChessTileProps) {
   return (
-    <span className={`ChessTile__tile_${isWhite ? 'w' : 'b'}`}>{imagePiece && <img className='ChessTile__tile_piece' src={`${imagePiece}`} alt='piece'/>}</span>
+    <div className={`ChessTile__tile_${isWhite ? 'w' : 'b'}`}>{imagePiece && <div className='ChessTile__tile_piece' style={{backgroundImage: `url(${imagePiece})`}} ></div>}</div>
   )
 }

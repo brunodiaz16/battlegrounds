@@ -17,6 +17,16 @@
 }
 
 .ChessTile__tile_piece {
-    width: 70px;
-    height: 70px;
+    width: 100px;
+    height: 100px;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.ChessTile__tile_piece:hover {
+    cursor: grab;
+}
+
+.ChessTile__tile_piece:active {
+    cursor: grabbing;
 }

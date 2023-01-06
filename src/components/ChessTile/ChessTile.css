@@ -15,3 +15,8 @@
     align-items: center;
     justify-content: center;
 }
+
+.ChessTile__tile_piece {
+    width: 70px;
+    height: 70px;
+}

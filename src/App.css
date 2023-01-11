@@ -33,7 +33,7 @@
   height: 100vh;
   display: flex;
   align-items: center;
-  background-color: black;
+  background-color: rgb(32, 31, 31);
   justify-content: center;
 }
 

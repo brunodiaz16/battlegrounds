@@ -1,5 +1,6 @@
 import {Dispatch} from 'react'
-import { Piece } from '../interfaces';
+import { Piece } from '../interfaces/interfaces';
+import Referee from './referee';
 
 export function grabPiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, activePiece: HTMLElement | null, setActicePiece: Dispatch<any>, chessboardRef: any, setActiveX: Dispatch<number>, setActiveY: Dispatch<number>) {
     const element = e.target as HTMLElement;
@@ -40,24 +41,27 @@ export function movePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, activ
 
 }
 
-export function releasePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, activePiece: HTMLElement | null, setActicePiece: Dispatch<any>, setPieces: Dispatch<any>, chessboardRef: any, activeX:number, activeY: number) {
+export function releasePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, activePiece: HTMLElement | null, setActicePiece: Dispatch<any>, setPieces: Dispatch<any>, chessboardRef: any, activeX:number, activeY: number, referee: Referee) {
     const chessboard = chessboardRef.current
     const x = Math.floor((e.clientX - chessboard.offsetLeft)/100);
     const y = Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 800)/100))
-    console.log(activeX, activeY, x, y)
     
     if(activePiece && chessboard){
         // console.log("release", e.target)
-        setPieces((value: Piece[]) => {
-            const pieces = value.map((p:Piece) => {
-                if(p.x === activeX && p.y === activeY) {
-                    p.x = x
-                    p.y = y
-                }
-                return p
+        
+            setPieces((value: Piece[]) => {
+                const pieces = value.map((p:Piece) => {
+                    if(p.x === activeX && p.y === activeY) {
+                        if(referee.isValidMove(activeX, activeY, x,y, p.type, p.team)){
+                            p.x = x
+                            p.y = y
+                        }
+                    }
+                    return p
+                })
+                return pieces
             })
-            return pieces
-        })
+        
         const element = e.target as HTMLElement 
         element.style.position = 'static'
         setActicePiece(null)

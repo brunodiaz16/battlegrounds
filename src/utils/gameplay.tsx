@@ -41,7 +41,7 @@ export function movePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, activ
 
 }
 
-export function releasePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, activePiece: HTMLElement | null, setActicePiece: Dispatch<any>, setPieces: Dispatch<any>, chessboardRef: any, activeX:number, activeY: number, referee: Referee) {
+export function releasePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, activePiece: HTMLElement | null, setActicePiece: Dispatch<any>, boardState: Piece[], setPieces: Dispatch<any>, chessboardRef: any, activeX:number, activeY: number, referee: Referee) {
     const chessboard = chessboardRef.current
     const x = Math.floor((e.clientX - chessboard.offsetLeft)/100);
     const y = Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 800)/100))
@@ -52,7 +52,7 @@ export function releasePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, ac
             setPieces((value: Piece[]) => {
                 const pieces = value.map((p:Piece) => {
                     if(p.x === activeX && p.y === activeY) {
-                        if(referee.isValidMove(activeX, activeY, x,y, p.type, p.team)){
+                        if(referee.isValidMove(activeX, activeY, x,y, p.type, p.team, boardState)){
                             p.x = x
                             p.y = y
                         }

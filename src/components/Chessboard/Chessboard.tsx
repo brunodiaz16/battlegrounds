@@ -20,7 +20,7 @@ export default function Chessboard() {
         ref={chessboardRef} 
         onMouseDown={(e) => grabPiece(e, activePiece, setActicePiece, chessboardRef, setActiveX, setActiveY)} 
         onMouseMove={(e) => movePiece(e, activePiece, chessboardRef)} 
-        onMouseUp={(e) => releasePiece(e, activePiece, setActicePiece, setPieces, chessboardRef, activeX, activeY, referee)}  
+        onMouseUp={(e) => releasePiece(e, activePiece, setActicePiece, pieces, setPieces, chessboardRef, activeX, activeY, referee)}  
         id="chessboard" 
         className='chessboard__board'>
           {pieces && board}

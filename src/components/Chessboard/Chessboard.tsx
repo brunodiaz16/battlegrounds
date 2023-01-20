@@ -11,6 +11,7 @@ export default function Chessboard() {
   const [activePiece, setActicePiece] = useState<HTMLInputElement | null>(null) 
   const [activeX, setActiveX] = useState(0)
   const [activeY, setActiveY] = useState(0)
+  const [enPassant, setEnPassant] = useState(false)
   const [pieces, setPieces] = useState<Piece[]>(setInitialPiecesPositions())
   const board = generateBoardGrid(verticalAxis, horizontalAxis, pieces)
   const chessboardRef = useRef<HTMLDivElement>(null)
@@ -20,7 +21,7 @@ export default function Chessboard() {
         ref={chessboardRef} 
         onMouseDown={(e) => grabPiece(e, activePiece, setActicePiece, chessboardRef, setActiveX, setActiveY)} 
         onMouseMove={(e) => movePiece(e, activePiece, chessboardRef)} 
-        onMouseUp={(e) => releasePiece(e, activePiece, setActicePiece, pieces, setPieces, chessboardRef, activeX, activeY, referee)}  
+        onMouseUp={(e) => releasePiece(e, activePiece, setActicePiece, pieces, setPieces, chessboardRef, activeX, activeY, referee, enPassant, setEnPassant)}  
         id="chessboard" 
         className='chessboard__board'>
           {pieces && board}

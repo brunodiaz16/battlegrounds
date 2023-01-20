@@ -1,4 +1,5 @@
 import {Dispatch} from 'react'
+import { PlayType } from '../interfaces/enums';
 import { Piece } from '../interfaces/interfaces';
 import Referee from './referee';
 
@@ -41,26 +42,31 @@ export function movePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, activ
 
 }
 
-export function releasePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, activePiece: HTMLElement | null, setActicePiece: Dispatch<any>, boardState: Piece[], setPieces: Dispatch<any>, chessboardRef: any, activeX:number, activeY: number, referee: Referee) {
+export function releasePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, activePiece: HTMLElement | null, setActicePiece: Dispatch<any>, boardState: Piece[], setPieces: Dispatch<any>, chessboardRef: any, activeX:number, activeY: number, referee: Referee, enPassant: boolean, setEnPassant: Dispatch<boolean>) {
     const chessboard = chessboardRef.current
     const x = Math.floor((e.clientX - chessboard.offsetLeft)/100);
     const y = Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 800)/100))
     
     if(activePiece && chessboard){
-        // console.log("release", e.target)
-        
-            setPieces((value: Piece[]) => {
-                const pieces = value.map((p:Piece) => {
-                    if(p.x === activeX && p.y === activeY) {
-                        if(referee.isValidMove(activeX, activeY, x,y, p.type, p.team, boardState)){
-                            p.x = x
-                            p.y = y
-                        }
+        let pieces = [...boardState]
+        pieces.forEach((p: Piece) => {
+            if(p.x === activeX && p.y === activeY) {
+                const {valid, playType} = referee.isValidPlay(activeX, activeY, x,y, p.type, p.team, boardState, enPassant, setEnPassant)
+                if(valid){
+                    if(playType === PlayType.MOVE){
+                        p.x = x
+                        p.y = y
                     }
-                    return p
-                })
-                return pieces
-            })
+                    else if(playType === PlayType.ATTACK) {
+                        pieces = pieces.filter((p: Piece) => !(p.x === x && p.y === y));
+                        p.x = x;
+                        p.y = y;
+                    }
+                    if(enPassant) setEnPassant(false)
+                }
+            }
+        });
+        setPieces(pieces)
         
         const element = e.target as HTMLElement 
         element.style.position = 'static'

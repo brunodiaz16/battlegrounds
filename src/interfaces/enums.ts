@@ -11,3 +11,9 @@ export enum TeamType {
     OPPONENT,
     OUR
 }
+
+export enum PlayType {
+    MOVE,
+    ATTACK,
+    INVALID
+}

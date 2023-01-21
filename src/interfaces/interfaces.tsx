@@ -6,5 +6,6 @@ export interface Piece {
     y: number
     type: PieceType
     team: TeamType
+    EnPassant?: boolean
   
 }

@@ -1,5 +1,5 @@
 import {Dispatch} from 'react'
-import { PlayType } from '../interfaces/enums';
+import { PieceType, PlayType, TeamType } from '../interfaces/enums';
 import { Piece } from '../interfaces/interfaces';
 import Referee from './referee';
 
@@ -47,6 +47,7 @@ export function releasePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, ac
     const x = Math.floor((e.clientX - chessboard.offsetLeft)/100);
     const y = Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 800)/100))
     
+    
     if(activePiece && chessboard){
         let pieces = [...boardState]
         pieces.forEach((p: Piece) => {
@@ -54,18 +55,30 @@ export function releasePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, ac
                 const {valid, playType} = referee.isValidPlay(activeX, activeY, x,y, p.type, p.team, boardState, enPassant, setEnPassant)
                 if(valid){
                     if(playType === PlayType.MOVE){
+                        console.log("move", x , p.x, y, p.y)
                         p.x = x
                         p.y = y
                     }
                     else if(playType === PlayType.ATTACK) {
-                        pieces = pieces.filter((p: Piece) => !(p.x === x && p.y === y));
+                        console.log('checkAttackType', enPassant, p.x, x, p.y, activeY, p.EnPassant)
+                        
+                        if(enPassant) {
+                            pieces = pieces.filter((p) => !(p.x === x && p.y === activeY && p.EnPassant && p.type === PieceType.PAWN));
+                        } else {
+                          pieces = pieces.filter((p) => !(p.x === x && p.y === y));
+                        }
                         p.x = x;
                         p.y = y;
+                    
                     }
-                    if(enPassant) setEnPassant(false)
+                    if(enPassant) {
+                        p.EnPassant = false
+                        setEnPassant(false)
+                    }
                 }
             }
         });
+        
         setPieces(pieces)
         
         const element = e.target as HTMLElement 

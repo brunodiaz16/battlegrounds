@@ -11,6 +11,10 @@ export default class Referee {
         return boardState.some(piece => piece.x === x && piece.y === y && piece.team !== team) 
     }
 
+    EnPassanttileIsOcupiedByOpponent(x: number, y: number, boardState: Piece[], team: TeamType): boolean {
+        return boardState.find((p) => p.x === x && p.y === y && p.team !== team)?.EnPassant === true
+    }
+
     PieceInTheWay(activeX: number, activeY: number, x: number, y: number, boardState: Piece[] ): boolean {
         if(activeX === x) {
             // move vertically
@@ -47,15 +51,18 @@ export default class Referee {
         return false;
     }
 
-    isValidPawnMove(activeX: number, activeY:number, x: number, y: number, yIncrement: number,  setEnPassant: Dispatch<boolean>): boolean {
+    isValidPawnMove(activeX: number, activeY:number, x: number, y: number, yIncrement: number,  setEnPassant: Dispatch<boolean>, boardState: Piece[]): boolean {
         // console.log("Move direction", activeX, activeY, x, y, yIncrement)
         if(activeX !== x) {
             return false;
         }
         if(activeY === 1 || activeY === 6) {
             if(y - activeY === yIncrement || y - activeY === 2 * yIncrement) {
-                if(y - activeY === 2 * yIncrement)
+                if(y - activeY === 2 * yIncrement){
+                    const piece = boardState.find((p) => p.x === activeX && p.y === activeY)
+                    if(piece) piece.EnPassant = true;
                     setEnPassant(true)
+                }
                 return true;
             }
         } else {
@@ -67,16 +74,14 @@ export default class Referee {
     }
 
     isValidPawnAttack(activeX: number, activeY:number, x: number, y: number, yIncrement: number, boardState: Piece[], team: TeamType, enPassant: boolean): boolean {
-        // console.log("ATTACK TRUE?", activeX - x === 1, activeX -x === -1 ,activeY-y === yIncrement ,this.tileIsOcupiedByOpponent(x, y, boardState, team))
-        if((x - activeX === 1 ||  x- activeX === -1) && y-activeY === yIncrement && this.tileIsOcupiedByOpponent(x-(-(yIncrement)), y, boardState, team)){
+        console.log("ATTACK TRUE?", activeX - x === 1, activeX -x === -1 ,activeY-y === yIncrement ,this.tileIsOcupiedByOpponent(x, y, boardState, team))
+        if((x - activeX === 1 ||  x- activeX === -1) && y-activeY === yIncrement && this.tileIsOcupiedByOpponent(x, y, boardState, team)){
             return true;
         }
-        const isEnPassant = enPassant && (x - activeX === 1 ||  x- activeX === -1) && y-activeY === yIncrement && this.tileIsOcupiedByOpponent(x, activeY, boardState, team)
-        console.log("ENPASSENT CHECK",x, activeX, x === activeX , y-activeY === yIncrement , this.tileIsOcupiedByOpponent(x, activeY, boardState, team) )
-        if(isEnPassant){
-            console.log("ENPASSENT MOVE")
-            return true
-        }
+        // const isEnPassant = enPassant && (x - activeX === 1 ||  x- activeX === -1) && y-activeY === yIncrement && this.EnPassanttileIsOcupiedByOpponent(x, activeY, boardState, team) && !this.tileIsOcupied(x, y, boardState)
+        // if(isEnPassant){
+        //     return true
+        // }
         return false
     }
 
@@ -85,7 +90,8 @@ export default class Referee {
             switch(type) {
                 case PieceType.PAWN:
                     const moveDirection = team === TeamType.OUR ? 1 : -1
-                    if(this.isValidPawnMove(activeX, activeY, x, y, moveDirection, setEnPassant)){
+                    console.log("ISVALID", this.isValidPawnMove(activeX, activeY, x, y, moveDirection, setEnPassant, boardState), this.isValidPawnAttack(activeX, activeY, x, y, moveDirection, boardState, team, enPassant) )
+                    if(this.isValidPawnMove(activeX, activeY, x, y, moveDirection, setEnPassant, boardState)){
                         if(!this.tileIsOcupied(x, y, boardState) && !this.PieceInTheWay(activeX, activeY, x, y, boardState)){
                             return {valid:true, playType: PlayType.MOVE};
                         }; 

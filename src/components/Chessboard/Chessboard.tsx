@@ -16,6 +16,8 @@ export default function Chessboard() {
   const board = generateBoardGrid(verticalAxis, horizontalAxis, pieces)
   const chessboardRef = useRef<HTMLDivElement>(null)
   const referee = new Referee()
+  console.log("DEBUG CHESSBOARD", pieces.map(p => p?.EnPassant));
+  console.log("DEBUG ENPASSENT", enPassant)
   return (
     <div 
         ref={chessboardRef} 

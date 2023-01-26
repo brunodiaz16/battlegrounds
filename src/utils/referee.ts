@@ -74,14 +74,14 @@ export default class Referee {
     }
 
     isValidPawnAttack(activeX: number, activeY:number, x: number, y: number, yIncrement: number, boardState: Piece[], team: TeamType, enPassant: boolean): boolean {
-        console.log("ATTACK TRUE?", activeX - x === 1, activeX -x === -1 ,activeY-y === yIncrement ,this.tileIsOcupiedByOpponent(x, y, boardState, team))
+        // console.log("ATTACK TRUE?", activeX - x === 1, activeX -x === -1 ,activeY-y === yIncrement ,this.tileIsOcupiedByOpponent(x, y, boardState, team))
         if((x - activeX === 1 ||  x- activeX === -1) && y-activeY === yIncrement && this.tileIsOcupiedByOpponent(x, y, boardState, team)){
             return true;
         }
-        // const isEnPassant = enPassant && (x - activeX === 1 ||  x- activeX === -1) && y-activeY === yIncrement && this.EnPassanttileIsOcupiedByOpponent(x, activeY, boardState, team) && !this.tileIsOcupied(x, y, boardState)
-        // if(isEnPassant){
-        //     return true
-        // }
+        const isEnPassant = enPassant && (x - activeX === 1 ||  x- activeX === -1) && y-activeY === yIncrement && this.EnPassanttileIsOcupiedByOpponent(x, activeY, boardState, team) && !this.tileIsOcupied(x, y, boardState)
+        if(isEnPassant){
+            return true
+        }
         return false
     }
 

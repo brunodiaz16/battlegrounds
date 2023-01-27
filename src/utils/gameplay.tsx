@@ -1,7 +1,7 @@
 import {Dispatch} from 'react'
-import { PieceType, PlayType, TeamType } from '../interfaces/enums';
+import { PieceType, PlayType } from '../interfaces/enums';
 import { Piece } from '../interfaces/interfaces';
-import Referee from './referee';
+import Referee from "./referee";
 
 export function grabPiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, activePiece: HTMLElement | null, setActicePiece: Dispatch<any>, chessboardRef: any, setActiveX: Dispatch<number>, setActiveY: Dispatch<number>) {
     const element = e.target as HTMLElement;
@@ -68,7 +68,7 @@ export function releasePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, ac
         pieces.forEach((p: Piece) => {
             if(p.x === activeX && p.y === activeY) {
                 const {valid, playType} = referee.isValidPlay(activeX, activeY, x,y, p.type, p.team, boardState, enPassant);
-                const isNeedEnPassantMark = referee.isNeedEnPassantMark(activeX, activeY, x,y, p.type);
+                const isNeedEnPassantMark = Referee.isNeedEnPassantMark(activeX, activeY, x,y, p.type);
                 if(valid){
                     if(playType === PlayType.MOVE){
                         console.log("move", x , p.x, y, p.y)
@@ -103,6 +103,7 @@ export function releasePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, ac
                             setEnPassant(true);
                         }
                     }
+                    referee.increaseMoves();
                 }
             }
         });

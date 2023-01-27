@@ -2,7 +2,7 @@ import './Chessboard.css';
 import {horizontalAxis, verticalAxis} from '../../constants/axis'
 import { generateBoardGrid, setInitialPiecesPositions } from '../../utils/boardGeneration';
 import { grabPiece, movePiece, releasePiece } from '../../utils/gameplay';
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Piece } from '../../interfaces/interfaces';
 import Referee from '../../utils/referee'
 
@@ -15,18 +15,21 @@ export default function Chessboard() {
   const [pieces, setPieces] = useState<Piece[]>(setInitialPiecesPositions())
   const board = generateBoardGrid(verticalAxis, horizontalAxis, pieces)
   const chessboardRef = useRef<HTMLDivElement>(null)
-  const referee = new Referee()
-  console.log("DEBUG CHESSBOARD", pieces.map(p => p?.EnPassant));
-  console.log("DEBUG ENPASSENT", enPassant)
+  const referee = React.useMemo(() => new Referee(), [])
+
   return (
-    <div 
-        ref={chessboardRef} 
-        onMouseDown={(e) => grabPiece(e, activePiece, setActicePiece, chessboardRef, setActiveX, setActiveY)} 
-        onMouseMove={(e) => movePiece(e, activePiece, chessboardRef)} 
-        onMouseUp={(e) => releasePiece(e, activePiece, setActicePiece, pieces, setPieces, chessboardRef, activeX, activeY, referee, enPassant, setEnPassant)}  
-        id="chessboard" 
-        className='chessboard__board'>
+      <>
+          <div>{referee.getCurrentTurn() ? "Whites Moves" : "Black Moves"}</div>
+        <div
+            ref={chessboardRef}
+            onMouseDown={(e) => grabPiece(e, activePiece, setActicePiece, chessboardRef, setActiveX, setActiveY)}
+            onMouseMove={(e) => movePiece(e, activePiece, chessboardRef)}
+            onMouseUp={(e) => releasePiece(e, activePiece, setActicePiece, pieces, setPieces, chessboardRef, activeX, activeY, referee, enPassant, setEnPassant)}
+            id="chessboard"
+            className='chessboard__board'>
           {pieces && board}
-    </div>
+        </div>
+      </>
+
   )
 }

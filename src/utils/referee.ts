@@ -1,6 +1,10 @@
-import { PieceType, PlayType, TeamType } from "../interfaces/enums";
-import { Piece } from "../interfaces/interfaces";
+import {PieceType, PlayType, TeamType} from "../interfaces/enums";
+import {Piece} from "../interfaces/interfaces";
 import {Dispatch} from 'react'
+
+/**
+ * Class containing helper functions to enforce the Chess rules
+ */
 
 export default class Referee {
     tileIsOcupied(x: number, y: number, boardState: Piece[]): boolean {
@@ -51,55 +55,61 @@ export default class Referee {
         return false;
     }
 
-    isValidPawnMove(activeX: number, activeY:number, x: number, y: number, yIncrement: number,  setEnPassant: Dispatch<boolean>, boardState: Piece[]): boolean {
+    /**
+     * This function checks whenever the pawns has done a valid move:
+     *  - Pawn should only be able to move either forward or (diagonally forward), one or two cells depending on the case.
+     *  - Response to the questions: is there any situation that allow me to do this move?
+     * @param activeX
+     * @param activeY
+     * @param x
+     * @param y
+     * @param moveDirection
+     * @param boardState
+     */
+    isValidPawnMove(activeX: number, activeY:number, x: number, y: number, moveDirection: number, boardState: Piece[]): boolean {
         // console.log("Move direction", activeX, activeY, x, y, yIncrement)
-        if(activeX !== x) {
-            return false;
-        }
-        if(activeY === 1 || activeY === 6) {
-            if(y - activeY === yIncrement || y - activeY === 2 * yIncrement) {
-                if(y - activeY === 2 * yIncrement){
-                    const piece = boardState.find((p) => p.x === activeX && p.y === activeY)
-                    if(piece) piece.EnPassant = true;
-                    setEnPassant(true)
-                }
-                return true;
-            }
-        } else {
-            if(y - activeY === yIncrement) {
-                return true;
-            }
-        }
-        return false;
+        // const hasMoveOnTheSameLine = (() =>  activeX === x)();
+        // const isFirstMove = (() => activeY === (moveDirection === 1 ? 1 : 6))();
+
+        const isMovingForward = (() => moveDirection === 1 ? y > activeY : y < activeY)();
+        const numOfCellsMovedOnY = (() => Math.abs(y - activeY))();
+        const numOfCellsMovedOnX = (() => Math.abs(x - activeX))();
+
+        return !(numOfCellsMovedOnY > 2 || !isMovingForward || numOfCellsMovedOnX > 1);
     }
 
-    isValidPawnAttack(activeX: number, activeY:number, x: number, y: number, yIncrement: number, boardState: Piece[], team: TeamType, enPassant: boolean): boolean {
-        // console.log("ATTACK TRUE?", activeX - x === 1, activeX -x === -1 ,activeY-y === yIncrement ,this.tileIsOcupiedByOpponent(x, y, boardState, team))
-        if((x - activeX === 1 ||  x- activeX === -1) && y-activeY === yIncrement && this.tileIsOcupiedByOpponent(x, y, boardState, team)){
-            return true;
+    isValidPawnAttack(activeX: number, activeY:number, x: number, y: number, moveDirection: number, boardState: Piece[], team: TeamType, enPassant: boolean): boolean {
+        const numOfCellsMovedOnX = Math.abs(x - activeX);
+
+        if(numOfCellsMovedOnX !== 1) return false;
+
+        if(enPassant){
+            return this.EnPassanttileIsOcupiedByOpponent(x, activeY, boardState, team);
         }
-        const isEnPassant = enPassant && (x - activeX === 1 ||  x- activeX === -1) && y-activeY === yIncrement && this.EnPassanttileIsOcupiedByOpponent(x, activeY, boardState, team) && !this.tileIsOcupied(x, y, boardState)
-        if(isEnPassant){
-            return true
-        }
-        return false
+
+        return this.tileIsOcupiedByOpponent(x, y, boardState, team);
     }
 
-    isValidPlay(activeX: number, activeY: number, x: number, y: number, type: PieceType, team: TeamType, boardState: Piece[],  enPassant: boolean, setEnPassant: Dispatch<boolean>): {valid: boolean, playType: PlayType} {
+    isValidPlay(activeX: number, activeY: number, x: number, y: number, type: PieceType, team: TeamType, boardState: Piece[],  enPassant: boolean): {valid: boolean, playType: PlayType} {
             if (x < 0 || x > 7 || y < 0 || y > 7)  return {valid:false, playType: PlayType.INVALID};
             switch(type) {
                 case PieceType.PAWN:
-                    const moveDirection = team === TeamType.OUR ? 1 : -1
-                    console.log("ISVALID", this.isValidPawnMove(activeX, activeY, x, y, moveDirection, setEnPassant, boardState), this.isValidPawnAttack(activeX, activeY, x, y, moveDirection, boardState, team, enPassant) )
-                    if(this.isValidPawnMove(activeX, activeY, x, y, moveDirection, setEnPassant, boardState)){
-                        if(!this.tileIsOcupied(x, y, boardState) && !this.PieceInTheWay(activeX, activeY, x, y, boardState)){
-                            return {valid:true, playType: PlayType.MOVE};
-                        }; 
+                    const moveDirection = team === TeamType.OUR ? 1 : -1;
+                    const moveType =  activeX !== x ? PlayType.ATTACK : PlayType.MOVE;
+                    const isValidMove = this.isValidPawnMove(activeX, activeY, x, y, moveDirection, boardState);
+
+                    if(!isValidMove) return {valid:false, playType: PlayType.INVALID};
+
+                    if(moveType == PlayType.ATTACK){
+                        const isValidAttack = this.isValidPawnAttack(activeX, activeY, x, y, moveDirection, boardState, team, enPassant);
+                        return {valid: isValidAttack, playType: isValidAttack ? PlayType.ATTACK : PlayType.INVALID};
+                    } else if(moveType == PlayType.MOVE){
+                        const isTileOccupied = this.tileIsOcupied(x, y, boardState);
+                        const isPathMovingBlocked = this.PieceInTheWay(activeX, activeY, x, y, boardState);
+                        const canMove = !isTileOccupied && !isPathMovingBlocked;
+                        return {valid: canMove, playType: canMove ? PlayType.MOVE : PlayType.INVALID};
                     }
-                    else if(this.isValidPawnAttack(activeX, activeY, x, y, moveDirection, boardState, team, enPassant)) {
-                        return {valid:true, playType: PlayType.ATTACK};
-                    }
-                break;
+                    throw Error("How is this possible? \n" + this);
                 case PieceType.BISHOP:
                 break;
                 case PieceType.KNIGHT:
@@ -116,4 +126,9 @@ export default class Referee {
         
         return {valid:false, playType: PlayType.INVALID};
     }
+
+    isNeedEnPassantMark(activeX: number, activeY: number, x: number, y: number, type: PieceType): boolean {
+        return type === PieceType.PAWN && Math.abs(y - activeY) === 2;
+    }
+
 }

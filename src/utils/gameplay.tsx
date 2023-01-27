@@ -42,17 +42,33 @@ export function movePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, activ
 
 }
 
+
+/**
+ * Function that gets call on MouseUp event, this will check if the move is valid and perform the move of the pieces when need it.
+ * @param e - MouseUp event
+ * @param activePiece
+ * @param setActicePiece
+ * @param boardState - Array containing the position of the Pieces on the board
+ * @param setPieces
+ * @param chessboardRef
+ * @param activeX - Original/Current (X) position of the piece
+ * @param activeY - Original/Current (Y) position of the piece
+ * @param referee
+ * @param enPassant
+ * @param setEnPassant - Callback to update the EnPassant flag
+ */
 export function releasePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, activePiece: HTMLElement | null, setActicePiece: Dispatch<any>, boardState: Piece[], setPieces: Dispatch<any>, chessboardRef: any, activeX:number, activeY: number, referee: Referee, enPassant: boolean, setEnPassant: Dispatch<boolean>) {
-    const chessboard = chessboardRef.current
+    const chessboard = chessboardRef.current;
     const x = Math.floor((e.clientX - chessboard.offsetLeft)/100);
     const y = Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 800)/100))
-    
-    
+
+
     if(activePiece && chessboard){
         let pieces = [...boardState]
         pieces.forEach((p: Piece) => {
             if(p.x === activeX && p.y === activeY) {
-                const {valid, playType} = referee.isValidPlay(activeX, activeY, x,y, p.type, p.team, boardState, enPassant, setEnPassant)
+                const {valid, playType} = referee.isValidPlay(activeX, activeY, x,y, p.type, p.team, boardState, enPassant);
+                const isNeedEnPassantMark = referee.isNeedEnPassantMark(activeX, activeY, x,y, p.type);
                 if(valid){
                     if(playType === PlayType.MOVE){
                         console.log("move", x , p.x, y, p.y)
@@ -61,19 +77,31 @@ export function releasePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, ac
                     }
                     else if(playType === PlayType.ATTACK) {
                         console.log('checkAttackType', enPassant, p.x, x, p.y, activeY, p.EnPassant)
-                        
-                        if(enPassant) {
+                        if(enPassant) { //TODO: (1) Consolidate EnPassant Logic
+                            //Piece marked as EnPassant here
                             pieces = pieces.filter((p) => !(p.x === x && p.y === activeY && p.EnPassant && p.type === PieceType.PAWN));
                         } else {
-                          pieces = pieces.filter((p) => !(p.x === x && p.y === y));
+                            pieces = pieces.filter((p) => !(p.x === x && p.y === y));
                         }
                         p.x = x;
                         p.y = y;
-                    
                     }
+
+                    // After every move reset the enPassant
                     if(enPassant) {
-                        p.EnPassant = false
-                        setEnPassant(false)
+                        const markedPawn = pieces.find((p) => p.EnPassant && p.type === PieceType.PAWN); //TODO: (2) Consolidate EnPassant Logic
+                        if(markedPawn){
+                            markedPawn.EnPassant = false;
+                        }
+                        setEnPassant(false);
+                    }
+
+                    if(isNeedEnPassantMark) { //TODO: (3) Consolidate EnPassant Logic
+                        const piece = boardState.find((piece) => piece.x === x && piece.y === y);
+                        if(piece) {
+                            piece.EnPassant = true;
+                            setEnPassant(true);
+                        }
                     }
                 }
             }

@@ -106,9 +106,7 @@ export default class Referee {
 
         if(numOfCellsMovedOnX !== 1) return false;
 
-        if(enPassant){
-            return this.EnPassanttileIsOcupiedByOpponent(x, activeY, boardState, team);
-        }
+        if(enPassant && this.EnPassanttileIsOcupiedByOpponent(x, activeY, boardState, team)) return true;
 
         return this.tileIsOcupiedByOpponent(x, y, boardState, team);
     }

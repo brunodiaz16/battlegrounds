@@ -19,7 +19,7 @@ export default function Chessboard() {
 
   return (
       <>
-          <div>{referee.getCurrentTurn() ? "Whites Moves" : "Black Moves"}</div>
+          {/*<div>{referee.getCurrentTurn() ? "Whites Moves" : "Black Moves"}</div>*/}
         <div
             ref={chessboardRef}
             onMouseDown={(e) => grabPiece(e, activePiece, setActicePiece, chessboardRef, setActiveX, setActiveY)}

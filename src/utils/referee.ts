@@ -1,25 +1,38 @@
 import {PieceType, PlayType, TeamType} from "../interfaces/enums";
 import {Piece} from "../interfaces/interfaces";
-import {Dispatch} from 'react'
 
 /**
  * Class containing helper functions to enforce the Chess rules
  */
 
 export default class Referee {
-    tileIsOcupied(x: number, y: number, boardState: Piece[]): boolean {
+    private _moves: number = 0;
+
+    get moves(): number {
+        return this._moves;
+    }
+
+    private set moves(number :number) {
+        this._moves = number;
+    }
+    increaseMoves(){
+        this.moves = this._moves + 1;
+        console.log("Turn #: " + this._moves);
+    }
+
+    static tileIsOcupied(x: number, y: number, boardState: Piece[]): boolean {
         return boardState.some(piece => piece.x === x && piece.y === y)
     }
 
-    tileIsOcupiedByOpponent(x: number, y: number, boardState: Piece[], team: TeamType): boolean {
+    static tileIsOcupiedByOpponent(x: number, y: number, boardState: Piece[], team: TeamType): boolean {
         return boardState.some(piece => piece.x === x && piece.y === y && piece.team !== team) 
     }
 
-    EnPassanttileIsOcupiedByOpponent(x: number, y: number, boardState: Piece[], team: TeamType): boolean {
+    static EnPassanttileIsOcupiedByOpponent(x: number, y: number, boardState: Piece[], team: TeamType): boolean {
         return boardState.find((p) => p.x === x && p.y === y && p.team !== team)?.EnPassant === true
     }
 
-    PieceInTheWay(activeX: number, activeY: number, x: number, y: number, boardState: Piece[] ): boolean {
+    static PieceInTheWay(activeX: number, activeY: number, x: number, y: number, boardState: Piece[] ): boolean {
         if(activeX === x) {
             // move vertically
             let increment = activeY < y ? 1 : -1;
@@ -66,19 +79,29 @@ export default class Referee {
      * @param moveDirection
      * @param boardState
      */
-    isValidPawnMove(activeX: number, activeY:number, x: number, y: number, moveDirection: number, boardState: Piece[]): boolean {
-        // console.log("Move direction", activeX, activeY, x, y, yIncrement)
-        // const hasMoveOnTheSameLine = (() =>  activeX === x)();
-        // const isFirstMove = (() => activeY === (moveDirection === 1 ? 1 : 6))();
+    static isValidPawnMove(activeX: number, activeY:number, x: number, y: number, moveDirection: number, boardState: Piece[]): boolean {
+        const isFirstMove = activeY === (moveDirection === 1 ? 1 : 6);
+        const isMovingForward = moveDirection === 1 ? y > activeY : y < activeY;
+        const numOfCellsMovedOnY = Math.abs(y - activeY);
+        const numOfCellsMovedOnX = Math.abs(x - activeX);
 
-        const isMovingForward = (() => moveDirection === 1 ? y > activeY : y < activeY)();
-        const numOfCellsMovedOnY = (() => Math.abs(y - activeY))();
-        const numOfCellsMovedOnX = (() => Math.abs(x - activeX))();
-
-        return !(numOfCellsMovedOnY > 2 || !isMovingForward || numOfCellsMovedOnX > 1);
+        if (numOfCellsMovedOnX > 1) {
+            return false;
+        }
+        if (!isMovingForward) {
+            return false;
+        }
+        if (!(numOfCellsMovedOnY > 0 && numOfCellsMovedOnY <= 2)) {
+            return false;
+        }
+        if (!isFirstMove && numOfCellsMovedOnY !== 1) {
+            return false;
+        }
+        return true;
     }
 
-    isValidPawnAttack(activeX: number, activeY:number, x: number, y: number, moveDirection: number, boardState: Piece[], team: TeamType, enPassant: boolean): boolean {
+
+    static isValidPawnAttack(activeX: number, activeY:number, x: number, y: number, moveDirection: number, boardState: Piece[], team: TeamType, enPassant: boolean): boolean {
         const numOfCellsMovedOnX = Math.abs(x - activeX);
 
         if(numOfCellsMovedOnX !== 1) return false;
@@ -91,21 +114,21 @@ export default class Referee {
     }
 
     isValidPlay(activeX: number, activeY: number, x: number, y: number, type: PieceType, team: TeamType, boardState: Piece[],  enPassant: boolean): {valid: boolean, playType: PlayType} {
-            if (x < 0 || x > 7 || y < 0 || y > 7)  return {valid:false, playType: PlayType.INVALID};
+            if (Referee.isOutsideTheBoard(x, y) || !this.isYourTurn(team) || !Referee.didPieceMoved(activeX,activeY,x,y))  return {valid:false, playType: PlayType.INVALID};
             switch(type) {
                 case PieceType.PAWN:
                     const moveDirection = team === TeamType.OUR ? 1 : -1;
                     const moveType =  activeX !== x ? PlayType.ATTACK : PlayType.MOVE;
-                    const isValidMove = this.isValidPawnMove(activeX, activeY, x, y, moveDirection, boardState);
+                    const isValidMove = Referee.isValidPawnMove(activeX, activeY, x, y, moveDirection, boardState);
 
                     if(!isValidMove) return {valid:false, playType: PlayType.INVALID};
 
-                    if(moveType == PlayType.ATTACK){
-                        const isValidAttack = this.isValidPawnAttack(activeX, activeY, x, y, moveDirection, boardState, team, enPassant);
+                    if(moveType === PlayType.ATTACK){
+                        const isValidAttack = Referee.isValidPawnAttack(activeX, activeY, x, y, moveDirection, boardState, team, enPassant);
                         return {valid: isValidAttack, playType: isValidAttack ? PlayType.ATTACK : PlayType.INVALID};
-                    } else if(moveType == PlayType.MOVE){
-                        const isTileOccupied = this.tileIsOcupied(x, y, boardState);
-                        const isPathMovingBlocked = this.PieceInTheWay(activeX, activeY, x, y, boardState);
+                    } else if(moveType === PlayType.MOVE){
+                        const isTileOccupied = Referee.tileIsOcupied(x, y, boardState);
+                        const isPathMovingBlocked = Referee.PieceInTheWay(activeX, activeY, x, y, boardState);
                         const canMove = !isTileOccupied && !isPathMovingBlocked;
                         return {valid: canMove, playType: canMove ? PlayType.MOVE : PlayType.INVALID};
                     }
@@ -127,8 +150,38 @@ export default class Referee {
         return {valid:false, playType: PlayType.INVALID};
     }
 
-    isNeedEnPassantMark(activeX: number, activeY: number, x: number, y: number, type: PieceType): boolean {
+    static isOutsideTheBoard(x: number, y: number) {
+        return x < 0 || x > 7 || y < 0 || y > 7;
+    }
+
+    /**
+     * Even numbers represent every turn of the whites/Ours
+     * @param team
+     * @private
+     */
+    private isYourTurn(team: TeamType) {
+        return this.moves % 2 === 0 ? team === TeamType.OUR : team === TeamType.OPPONENT;
+    }
+
+    getCurrentTurn() {
+        return this.moves % 2 === 0 ? TeamType.OUR : TeamType.OPPONENT;
+    }
+
+
+    /**
+     * Flag Tell to tell the game to mark the moved piece as "EnPassant = true"
+     * @param activeX
+     * @param activeY
+     * @param x
+     * @param y
+     * @param type
+     */
+    static isNeedEnPassantMark(activeX: number, activeY: number, x: number, y: number, type: PieceType): boolean {
         return type === PieceType.PAWN && Math.abs(y - activeY) === 2;
+    }
+
+    static didPieceMoved(activeX: number, activeY: number, x: number, y: number): boolean {
+        return activeX !== x || activeY !== y;
     }
 
 }

@@ -106,9 +106,7 @@ export default class Referee {
 
         if(numOfCellsMovedOnX !== 1) return false;
 
-        if(enPassant){
-            return this.EnPassanttileIsOcupiedByOpponent(x, activeY, boardState, team);
-        }
+        if(enPassant && this.EnPassanttileIsOcupiedByOpponent(x, activeY, boardState, team)) return true;
 
         return this.tileIsOcupiedByOpponent(x, y, boardState, team);
     }
@@ -125,7 +123,7 @@ export default class Referee {
 
                     if(moveType === PlayType.ATTACK){
                         const isValidAttack = Referee.isValidPawnAttack(activeX, activeY, x, y, moveDirection, boardState, team, enPassant);
-                        return {valid: isValidAttack, playType: isValidAttack ? PlayType.ATTACK : PlayType.INVALID};
+                        return {valid: isValidAttack, playType: isValidAttack ? PlayType.ATTACK : PlayType.INVALID , };
                     } else if(moveType === PlayType.MOVE){
                         const isTileOccupied = Referee.tileIsOcupied(x, y, boardState);
                         const isPathMovingBlocked = Referee.PieceInTheWay(activeX, activeY, x, y, boardState);

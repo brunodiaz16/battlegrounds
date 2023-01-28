@@ -68,7 +68,6 @@ export function releasePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, ac
         pieces.forEach((p: Piece) => {
             if(p.x === activeX && p.y === activeY) {
                 const {valid, playType} = referee.isValidPlay(activeX, activeY, x,y, p.type, p.team, boardState, enPassant);
-                const isNeedEnPassantMark = Referee.isNeedEnPassantMark(activeX, activeY, x,y, p.type);
                 if(valid){
                     if(playType === PlayType.MOVE){
                         console.log("move", x , p.x, y, p.y)
@@ -77,32 +76,32 @@ export function releasePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, ac
                     }
                     else if(playType === PlayType.ATTACK) {
                         console.log('checkAttackType', enPassant, p.x, x, p.y, activeY, p.EnPassant)
-                        if(enPassant) { //TODO: (1) Consolidate EnPassant Logic
-                            //Piece marked as EnPassant here
-                            pieces = pieces.filter((p) => !(p.x === x && p.y === activeY && p.EnPassant && p.type === PieceType.PAWN));
-                        } else {
-                            pieces = pieces.filter((p) => !(p.x === x && p.y === y));
-                        }
+                        pieces = pieces.filter((p) => !(p.x === x && p.y === y));
                         p.x = x;
                         p.y = y;
                     }
 
-                    // After every move reset the enPassant
-                    if(enPassant) {
-                        const markedPawn = pieces.find((p) => p.EnPassant && p.type === PieceType.PAWN); //TODO: (2) Consolidate EnPassant Logic
-                        if(markedPawn){
-                            markedPawn.EnPassant = false;
+                    //Handle EnPassant
+                    if(enPassant) { //Remove the piece if attacked
+                        if(Referee.EnPassanttileIsOcupiedByOpponent(x, activeY, boardState, p.team)){
+                            pieces = pieces.filter((p) => !(p.x === x && p.y === activeY && p.EnPassant && p.type === PieceType.PAWN));
+                        } else {
+                            const markedPawn = pieces.find((p) => p.EnPassant && p.type === PieceType.PAWN);
+                            if(markedPawn){
+                                markedPawn.EnPassant = false;
+                            }
                         }
                         setEnPassant(false);
                     }
 
-                    if(isNeedEnPassantMark) { //TODO: (3) Consolidate EnPassant Logic
+                    if(Referee.isNeedEnPassantMark(activeX, activeY, x,y, p.type)) { //If player moved two cells activate EnPassant Flag
                         const piece = boardState.find((piece) => piece.x === x && piece.y === y);
                         if(piece) {
                             piece.EnPassant = true;
                             setEnPassant(true);
                         }
                     }
+
                     referee.increaseMoves();
                 }
             }

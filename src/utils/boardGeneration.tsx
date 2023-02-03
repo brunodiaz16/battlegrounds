@@ -11,13 +11,11 @@ import { PieceType, TeamType } from '../interfaces/enums';
 
 export function setInitialPiecesPositions() {
   const pieces: Piece[]  = [];
-
   // Pawns
   for(let i = 0; i < 8; i++) {
     pieces.push({x: i, y: 6, image:PawnB, type: PieceType.PAWN, team: TeamType.OPPONENT})
     pieces.push({x: i, y: 1, image:PawnW, type: PieceType.PAWN, team: TeamType.OUR})
   }
-  
   //Towers
   pieces.push({x: 0, y: 7, image:TowerB, type: PieceType.ROOK, team: TeamType.OPPONENT}, {x: 7, y: 7, image:TowerB, type: PieceType.ROOK, team: TeamType.OPPONENT}, {x: 0, y: 0, image:TowerW, type: PieceType.ROOK, team: TeamType.OUR}, {x: 7, y: 0, image:TowerW, type: PieceType.ROOK, team: TeamType.OUR});
   

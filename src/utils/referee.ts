@@ -111,14 +111,25 @@ export default class Referee {
         return this.tileIsOcupiedByOpponent(x, y, boardState, team);
     }
 
+    static isValidKnightPlay(activeX: number, activeY: number, x: number, y: number, boardState: Piece[]): boolean {
+        const xDiff = Math.abs(x - activeX);
+        const yDiff = Math.abs(y - activeY);
+    
+        if ((xDiff === 2 && yDiff === 1) || (xDiff === 1 && yDiff === 2)) {
+            if (Referee.tileIsOcupied(x, y, boardState)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     isValidPlay(activeX: number, activeY: number, x: number, y: number, type: PieceType, team: TeamType, boardState: Piece[],  enPassant: boolean): {valid: boolean, playType: PlayType} {
             if (Referee.isOutsideTheBoard(x, y) || !this.isYourTurn(team) || !Referee.didPieceMoved(activeX,activeY,x,y))  return {valid:false, playType: PlayType.INVALID};
+            const moveDirection = team === TeamType.OUR ? 1 : -1;
             switch(type) {
                 case PieceType.PAWN:
-                    const moveDirection = team === TeamType.OUR ? 1 : -1;
-                    const moveType =  activeX !== x ? PlayType.ATTACK : PlayType.MOVE;
                     const isValidMove = Referee.isValidPawnMove(activeX, activeY, x, y, moveDirection, boardState);
-
+                    const moveType =  activeX !== x ? PlayType.ATTACK : PlayType.MOVE;
                     if(!isValidMove) return {valid:false, playType: PlayType.INVALID};
 
                     if(moveType === PlayType.ATTACK){
@@ -131,9 +142,12 @@ export default class Referee {
                         return {valid: canMove, playType: canMove ? PlayType.MOVE : PlayType.INVALID};
                     }
                     throw Error("How is this possible? \n" + this);
-                case PieceType.BISHOP:
-                break;
                 case PieceType.KNIGHT:
+                    const isValidtPlay = Referee.isValidKnightPlay(activeX, activeY, x, y, boardState)
+                    console.log("KNIGHT MOVE", isValidtPlay)
+                    return {valid: isValidtPlay, playType: PlayType.MOVE}
+                break;
+                case PieceType.BISHOP:
                 break;
                 case PieceType.ROOK:
                 break;

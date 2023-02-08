@@ -175,6 +175,7 @@ export default class Referee {
                     if(isValidKnightAttack) return {valid:true, playType: PlayType.ATTACK};
                     return {valid: false, playType: PlayType.INVALID}
                 case PieceType.BISHOP:
+                    console.log("Check bishop move")
                 break;
                 case PieceType.ROOK:
                 break;

@@ -71,12 +71,12 @@ export function releasePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, ac
                 const {valid, playType} = referee.isValidPlay(activeX, activeY, x,y, p.type, p.team, boardState, enPassant);
                 if(valid){
                     if(playType === PlayType.MOVE){
-                        console.log("move", x , p.x, y, p.y)
+                        // console.log("move", x , p.x, y, p.y)
                         p.x = x
                         p.y = y
                     }
                     else if(playType === PlayType.ATTACK) {
-                        console.log('checkAttackType', enPassant, p.x, x, p.y, activeY, p.EnPassant)
+                        // console.log('checkAttackType', enPassant, p.x, x, p.y, activeY, p.EnPassant)
                         pieces = pieces.filter((p) => !(p.x === x && p.y === y));
                         p.x = x;
                         p.y = y;

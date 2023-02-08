@@ -17,7 +17,7 @@ export default class Referee {
     }
     increaseMoves(){
         this.moves = this._moves + 1;
-        console.log("Turn #: " + this._moves);
+        // console.log("Turn #: " + this._moves);
     }
 
     static tileIsOcupied(x: number, y: number, boardState: Piece[]): boolean {
@@ -111,15 +111,51 @@ export default class Referee {
         return this.tileIsOcupiedByOpponent(x, y, boardState, team);
     }
 
+    static isValidKnightPlay(activeX: number, activeY: number, x: number, y: number, boardState: Piece[]): boolean {
+        console.log("CHECK KNIGHT PLAY")
+        const xDiff = Math.abs(x - activeX);
+        const yDiff = Math.abs(y - activeY);
+    
+        if ((xDiff === 2 && yDiff === 1) || (xDiff === 1 && yDiff === 2)) {
+            return true;
+        }
+        return false;
+    }
+
+    static isValidKnightMove(activeX: number, activeY: number, x: number, y: number, boardState: Piece[]): boolean {
+        const isValidKnightPlay =  Referee.isValidKnightPlay(activeX, activeY, x,y, boardState)
+        console.log("Valid move", isValidKnightPlay)
+        if (isValidKnightPlay) {
+            if (!Referee.tileIsOcupied(x, y, boardState)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static isValidKnightAttack(activeX: number, activeY: number, x: number, y: number, boardState: Piece[], team: TeamType): boolean {
+        const isValidKnightPlay =  Referee.isValidKnightPlay(activeX, activeY, x,y, boardState)
+        console.log("Valid attack", isValidKnightPlay)
+        if (isValidKnightPlay) {
+            if (Referee.tileIsOcupiedByOpponent(x, y, boardState, team)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+
+
+
     isValidPlay(activeX: number, activeY: number, x: number, y: number, type: PieceType, team: TeamType, boardState: Piece[],  enPassant: boolean): {valid: boolean, playType: PlayType} {
             if (Referee.isOutsideTheBoard(x, y) || !this.isYourTurn(team) || !Referee.didPieceMoved(activeX,activeY,x,y))  return {valid:false, playType: PlayType.INVALID};
+            const moveDirection = team === TeamType.OUR ? 1 : -1;
             switch(type) {
                 case PieceType.PAWN:
-                    const moveDirection = team === TeamType.OUR ? 1 : -1;
+                    const isValidPawnMove = Referee.isValidPawnMove(activeX, activeY, x, y, moveDirection, boardState);
                     const moveType =  activeX !== x ? PlayType.ATTACK : PlayType.MOVE;
-                    const isValidMove = Referee.isValidPawnMove(activeX, activeY, x, y, moveDirection, boardState);
-
-                    if(!isValidMove) return {valid:false, playType: PlayType.INVALID};
+                    if(!isValidPawnMove) return {valid:false, playType: PlayType.INVALID};
 
                     if(moveType === PlayType.ATTACK){
                         const isValidAttack = Referee.isValidPawnAttack(activeX, activeY, x, y, moveDirection, boardState, team, enPassant);
@@ -131,9 +167,14 @@ export default class Referee {
                         return {valid: canMove, playType: canMove ? PlayType.MOVE : PlayType.INVALID};
                     }
                     throw Error("How is this possible? \n" + this);
-                case PieceType.BISHOP:
-                break;
                 case PieceType.KNIGHT:
+                    const isValidKnighMove = Referee.isValidKnightMove(activeX, activeY, x, y, boardState);
+                    const isValidKnightAttack = Referee.isValidKnightAttack(activeX, activeY, x, y, boardState, team);
+                    console.log("Check knight moves", isValidKnighMove, isValidKnightAttack)
+                    if(isValidKnighMove) return {valid:true, playType: PlayType.MOVE};
+                    if(isValidKnightAttack) return {valid:true, playType: PlayType.ATTACK};
+                    return {valid: false, playType: PlayType.INVALID}
+                case PieceType.BISHOP:
                 break;
                 case PieceType.ROOK:
                 break;

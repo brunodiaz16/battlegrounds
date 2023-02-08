@@ -1,4 +1,5 @@
 import {Dispatch} from 'react'
+import { GRID_SIZE } from '../constants/axis';
 import { PieceType, PlayType } from '../interfaces/enums';
 import { Piece } from '../interfaces/interfaces';
 import Referee from "./referee";
@@ -7,11 +8,11 @@ export function grabPiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, activ
     const element = e.target as HTMLElement;
     const chessboard = chessboardRef.current;
     if(element.classList.contains('ChessTile__tile_piece') && chessboard){
-        setActiveX(Math.floor((e.clientX - chessboard.offsetLeft)/100))
-        setActiveY(Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 800)/100)))
+        setActiveX(Math.floor((e.clientX - chessboard.offsetLeft)/GRID_SIZE))
+        setActiveY(Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 800)/GRID_SIZE)))
 
-        const x = e.clientX - 50
-        const y = e.clientY - 50
+        const x = e.clientX - GRID_SIZE/2
+        const y = e.clientY - GRID_SIZE/2
         element.style.position = 'absolute'
         element.style.left = `${x}px`
         element.style.top = `${y}px`
@@ -30,8 +31,8 @@ export function movePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, activ
         const minY = +chessboard.offsetTop - 25;
         const maxX = +chessboard.offsetLeft + chessboard.clientWidth - 75;
         const maxY =+chessboard.offsetTop + chessboard.clientHeight - 75;
-        const x = e.clientX - 50
-        const y = e.clientY - 50
+        const x = e.clientX - GRID_SIZE/2
+        const y = e.clientY - GRID_SIZE/2
         if((x > minX && y > minY) && (x < maxX && y < maxY)){
             activePiece.style.position = 'absolute'
             activePiece.style.left = `${x}px`
@@ -59,8 +60,8 @@ export function movePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, activ
  */
 export function releasePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, activePiece: HTMLElement | null, setActicePiece: Dispatch<any>, boardState: Piece[], setPieces: Dispatch<any>, chessboardRef: any, activeX:number, activeY: number, referee: Referee, enPassant: boolean, setEnPassant: Dispatch<boolean>) {
     const chessboard = chessboardRef.current;
-    const x = Math.floor((e.clientX - chessboard.offsetLeft)/100);
-    const y = Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 800)/100))
+    const x = Math.floor((e.clientX - chessboard.offsetLeft)/GRID_SIZE);
+    const y = Math.abs(Math.ceil((e.clientY - chessboard.offsetTop - 800)/GRID_SIZE))
 
 
     if(activePiece && chessboard){
@@ -70,12 +71,12 @@ export function releasePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, ac
                 const {valid, playType} = referee.isValidPlay(activeX, activeY, x,y, p.type, p.team, boardState, enPassant);
                 if(valid){
                     if(playType === PlayType.MOVE){
-                        console.log("move", x , p.x, y, p.y)
+                        // console.log("move", x , p.x, y, p.y)
                         p.x = x
                         p.y = y
                     }
                     else if(playType === PlayType.ATTACK) {
-                        console.log('checkAttackType', enPassant, p.x, x, p.y, activeY, p.EnPassant)
+                        // console.log('checkAttackType', enPassant, p.x, x, p.y, activeY, p.EnPassant)
                         pieces = pieces.filter((p) => !(p.x === x && p.y === y));
                         p.x = x;
                         p.y = y;

@@ -122,11 +122,11 @@ export default class Referee {
         return false;
     }
 
-    static isValidKnightMove(activeX: number, activeY: number, x: number, y: number, boardState: Piece[]): boolean {
+    static isValidKnightMove(activeX: number, activeY: number, x: number, y: number, boardState: Piece[], team: TeamType): boolean {
         const isValidKnightPlay =  Referee.isValidKnightPlay(activeX, activeY, x,y, boardState)
         console.log("Valid move", isValidKnightPlay)
         if (isValidKnightPlay) {
-            if (!Referee.tileIsOcupied(x, y, boardState)) {
+            if (!Referee.tileIsOcupied(x, y, boardState) && !Referee.tileIsOcupiedByOpponent(x, y, boardState, team)) {
                 return true;
             }
         }
@@ -136,12 +136,43 @@ export default class Referee {
     static isValidKnightAttack(activeX: number, activeY: number, x: number, y: number, boardState: Piece[], team: TeamType): boolean {
         const isValidKnightPlay =  Referee.isValidKnightPlay(activeX, activeY, x,y, boardState)
         console.log("Valid attack", isValidKnightPlay)
-        if (isValidKnightPlay) {
-            if (Referee.tileIsOcupiedByOpponent(x, y, boardState, team)) {
-                return true;
-            }
+        if (isValidKnightPlay && Referee.tileIsOcupiedByOpponent(x, y, boardState, team)) {
+            return true;
+            
         }
         return false;
+    }
+
+     static isValidBishopPlay(activeX: number, activeY: number, x: number, y: number, boardState: Piece[]): boolean {
+        // Check if the bishop moves diagonally
+        if (Math.abs(x - activeX) !== Math.abs(y - activeY)) {
+            return false;
+        }
+        return true;
+    }
+
+    static isValidBishopMove(activeX: number, activeY: number, x: number, y: number, boardState: Piece[], team: TeamType): boolean {
+        // Check if the bishop moves diagonally and the destination is not occupied by a piece of the same team
+        if (!Referee.isValidBishopPlay(activeX, activeY, x, y, boardState) || Referee.tileIsOcupiedByOpponent(x, y, boardState, team)) {
+            return false;
+        }
+        // Check if there's a piece in the way
+        if (Referee.PieceInTheWay(activeX, activeY, x, y, boardState)) {
+            return false;
+        }
+        return true;
+    }
+
+    static isValidBishopAttack(activeX: number, activeY: number, x: number, y: number, boardState: Piece[], team: TeamType): boolean {
+        // Check if the bishop moves diagonally and the destination is occupied by an opponent's piece
+        if (!Referee.isValidBishopPlay(activeX, activeY, x, y, boardState) || !Referee.tileIsOcupiedByOpponent(x, y, boardState, team)) {
+            return false;
+        }
+        // Check if there's a piece in the way
+        if (Referee.PieceInTheWay(activeX, activeY, x, y, boardState)) {
+            return false;
+        }
+        return true;
     }
 
 
@@ -168,15 +199,20 @@ export default class Referee {
                     }
                     throw Error("How is this possible? \n" + this);
                 case PieceType.KNIGHT:
-                    const isValidKnighMove = Referee.isValidKnightMove(activeX, activeY, x, y, boardState);
+                    const isValidKnightMove = Referee.isValidKnightMove(activeX, activeY, x, y, boardState, team);
                     const isValidKnightAttack = Referee.isValidKnightAttack(activeX, activeY, x, y, boardState, team);
-                    console.log("Check knight moves", isValidKnighMove, isValidKnightAttack)
-                    if(isValidKnighMove) return {valid:true, playType: PlayType.MOVE};
+                    console.log("Check knight moves", isValidKnightMove, isValidKnightAttack)
+                    if(isValidKnightMove) return {valid:true, playType: PlayType.MOVE};
                     if(isValidKnightAttack) return {valid:true, playType: PlayType.ATTACK};
                     return {valid: false, playType: PlayType.INVALID}
                 case PieceType.BISHOP:
                     console.log("Check bishop move")
-                break;
+                     const isValidBishopMove = Referee.isValidBishopMove(activeX, activeY, x, y, boardState, team);
+                    const isValidBishopAttack = Referee.isValidBishopAttack(activeX, activeY, x, y, boardState, team);
+                    console.log("Check knight moves", isValidBishopMove, isValidBishopAttack)
+                    if(isValidBishopMove) return {valid:true, playType: PlayType.MOVE};
+                    if(isValidBishopAttack) return {valid:true, playType: PlayType.ATTACK};
+                    return {valid: false, playType: PlayType.INVALID}
                 case PieceType.ROOK:
                 break;
                 case PieceType.QUEEN:

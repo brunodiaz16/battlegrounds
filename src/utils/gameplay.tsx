@@ -83,7 +83,7 @@ export function releasePiece(e: React.MouseEvent<HTMLDivElement, MouseEvent>, ac
                     }
 
                     /* ****** Handle EnPassant  ******* */
-                    if(enPassant) { //Remove the piece if attacked
+                    if(enPassant && PieceType.PAWN) { //Remove the piece if attacked
                         if(Referee.EnPassanttileIsOcupiedByOpponent(x, activeY, boardState, p.team)){
                             pieces = pieces.filter((p) => !(p.x === x && p.y === activeY && p.EnPassant && p.type === PieceType.PAWN));
                         } else {

@@ -145,6 +145,10 @@ export default class Referee {
 
      static isValidBishopPlay(activeX: number, activeY: number, x: number, y: number, boardState: Piece[]): boolean {
         // Check if the bishop moves diagonally
+        console.log('xs',x, activeX)
+        console.log('ys',y, activeY)
+        console.log('xs2',Math.abs(x - activeX))
+        console.log('ys2',Math.abs(y - activeY))
         if (Math.abs(x - activeX) !== Math.abs(y - activeY)) {
             return false;
         }
@@ -153,7 +157,7 @@ export default class Referee {
 
     static isValidBishopMove(activeX: number, activeY: number, x: number, y: number, boardState: Piece[], team: TeamType): boolean {
         // Check if the bishop moves diagonally and the destination is not occupied by a piece of the same team
-        if (!Referee.isValidBishopPlay(activeX, activeY, x, y, boardState) || Referee.tileIsOcupiedByOpponent(x, y, boardState, team)) {
+        if (!Referee.isValidBishopPlay(activeX, activeY, x, y, boardState) || Referee.tileIsOcupiedByOpponent(x, y, boardState, team) || Referee.tileIsOcupied(x, y, boardState)) {
             return false;
         }
         // Check if there's a piece in the way
@@ -166,6 +170,38 @@ export default class Referee {
     static isValidBishopAttack(activeX: number, activeY: number, x: number, y: number, boardState: Piece[], team: TeamType): boolean {
         // Check if the bishop moves diagonally and the destination is occupied by an opponent's piece
         if (!Referee.isValidBishopPlay(activeX, activeY, x, y, boardState) || !Referee.tileIsOcupiedByOpponent(x, y, boardState, team)) {
+            return false;
+        }
+        // Check if there's a piece in the way
+        if (Referee.PieceInTheWay(activeX, activeY, x, y, boardState)) {
+            return false;
+        }
+        return true;
+    }
+
+    static isValidRookPlay(activeX: number, activeY: number, x: number, y: number, boardState: Piece[]): boolean {
+        // Check if the Rook moves diagonally
+        if (Math.abs(x - activeX) === Math.abs(y - activeY)) {
+            return false;
+        }
+        return true;
+    }
+
+    static isValidRookMove(activeX: number, activeY: number, x: number, y: number, boardState: Piece[], team: TeamType): boolean {
+        // Check if the Rook moves diagonally and the destination is not occupied by a piece of the same team
+        if (!Referee.isValidRookPlay(activeX, activeY, x, y, boardState) || Referee.tileIsOcupiedByOpponent(x, y, boardState, team) || Referee.tileIsOcupied(x, y, boardState)) {
+            return false;
+        }
+        // Check if there's a piece in the way
+        if (Referee.PieceInTheWay(activeX, activeY, x, y, boardState)) {
+            return false;
+        }
+        return true;
+    }
+
+    static isValidRookAttack(activeX: number, activeY: number, x: number, y: number, boardState: Piece[], team: TeamType): boolean {
+        // Check if the Rook moves diagonally and the destination is occupied by an opponent's piece
+        if (!Referee.isValidRookPlay(activeX, activeY, x, y, boardState) || !Referee.tileIsOcupiedByOpponent(x, y, boardState, team)) {
             return false;
         }
         // Check if there's a piece in the way
@@ -206,20 +242,30 @@ export default class Referee {
                     if(isValidKnightAttack) return {valid:true, playType: PlayType.ATTACK};
                     return {valid: false, playType: PlayType.INVALID}
                 case PieceType.BISHOP:
-                    console.log("Check bishop move")
                      const isValidBishopMove = Referee.isValidBishopMove(activeX, activeY, x, y, boardState, team);
                     const isValidBishopAttack = Referee.isValidBishopAttack(activeX, activeY, x, y, boardState, team);
-                    console.log("Check knight moves", isValidBishopMove, isValidBishopAttack)
                     if(isValidBishopMove) return {valid:true, playType: PlayType.MOVE};
                     if(isValidBishopAttack) return {valid:true, playType: PlayType.ATTACK};
                     return {valid: false, playType: PlayType.INVALID}
                 case PieceType.ROOK:
-                    console.log('Rook play')
-                break;
+                    const isValidRookMove = Referee.isValidRookMove(activeX, activeY, x, y, boardState, team);
+                    const isValidRookAttack = Referee.isValidRookAttack(activeX, activeY, x, y, boardState, team);
+                    if(isValidRookMove) return {valid:true, playType: PlayType.MOVE};
+                    if(isValidRookAttack) return {valid:true, playType: PlayType.ATTACK};
+                    return {valid: false, playType: PlayType.INVALID}
                 case PieceType.QUEEN:
-                break;
+                    const isValidQueenMove = Referee.isValidRookMove(activeX, activeY, x, y, boardState, team) || Referee.isValidBishopMove(activeX, activeY, x, y, boardState, team);
+                    const isValidQueenAttack = Referee.isValidRookAttack(activeX, activeY, x, y, boardState, team) || Referee.isValidBishopAttack(activeX, activeY, x, y, boardState, team);
+                    if(isValidQueenMove) return {valid:true, playType: PlayType.MOVE};
+                    if(isValidQueenAttack) return {valid:true, playType: PlayType.ATTACK};
+                    return {valid: false, playType: PlayType.INVALID}
                 case PieceType.KING:
-                break;
+                    const moveOneSpace = Math.abs(x - activeX) < 2 && Math.abs(y - activeY) < 2
+                    const isValidKingMove = (Referee.isValidRookMove(activeX, activeY, x, y, boardState, team) || Referee.isValidBishopMove(activeX, activeY, x, y, boardState, team)) && moveOneSpace;
+                    const isValidKingAttack = (Referee.isValidRookAttack(activeX, activeY, x, y, boardState, team) || Referee.isValidBishopAttack(activeX, activeY, x, y, boardState, team)) && moveOneSpace;
+                    if(isValidKingMove) return {valid:true, playType: PlayType.MOVE};
+                    if(isValidKingAttack) return {valid:true, playType: PlayType.ATTACK};
+                    return {valid: false, playType: PlayType.INVALID}
             }
         
         

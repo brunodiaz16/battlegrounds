@@ -112,7 +112,6 @@ export default class Referee {
     }
 
     static isValidKnightPlay(activeX: number, activeY: number, x: number, y: number, boardState: Piece[]): boolean {
-        console.log("CHECK KNIGHT PLAY")
         const xDiff = Math.abs(x - activeX);
         const yDiff = Math.abs(y - activeY);
     
@@ -124,7 +123,6 @@ export default class Referee {
 
     static isValidKnightMove(activeX: number, activeY: number, x: number, y: number, boardState: Piece[], team: TeamType): boolean {
         const isValidKnightPlay =  Referee.isValidKnightPlay(activeX, activeY, x,y, boardState)
-        console.log("Valid move", isValidKnightPlay)
         if (isValidKnightPlay) {
             if (!Referee.tileIsOcupied(x, y, boardState) && !Referee.tileIsOcupiedByOpponent(x, y, boardState, team)) {
                 return true;
@@ -135,7 +133,6 @@ export default class Referee {
 
     static isValidKnightAttack(activeX: number, activeY: number, x: number, y: number, boardState: Piece[], team: TeamType): boolean {
         const isValidKnightPlay =  Referee.isValidKnightPlay(activeX, activeY, x,y, boardState)
-        console.log("Valid attack", isValidKnightPlay)
         if (isValidKnightPlay && Referee.tileIsOcupiedByOpponent(x, y, boardState, team)) {
             return true;
             
@@ -144,11 +141,7 @@ export default class Referee {
     }
 
      static isValidBishopPlay(activeX: number, activeY: number, x: number, y: number, boardState: Piece[]): boolean {
-        // Check if the bishop moves diagonally
-        console.log('xs',x, activeX)
-        console.log('ys',y, activeY)
-        console.log('xs2',Math.abs(x - activeX))
-        console.log('ys2',Math.abs(y - activeY))
+        // Check if the bishop moves diagonallygi
         if (Math.abs(x - activeX) !== Math.abs(y - activeY)) {
             return false;
         }

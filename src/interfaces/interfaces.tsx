@@ -1,11 +1,10 @@
-import { PieceType, TeamType } from "./enums"
+import { PieceType, TeamType } from "./enums";
 
 export interface Piece {
-    image: string
-    x: number
-    y: number
-    type: PieceType
-    team: TeamType
-    EnPassant?: boolean
-  
+  image: string;
+  x: number;
+  y: number;
+  type: PieceType;
+  team: TeamType;
+  EnPassant?: boolean;
 }
